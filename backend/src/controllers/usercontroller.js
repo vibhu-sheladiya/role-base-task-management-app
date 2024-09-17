@@ -1,9 +1,9 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
-const User = require("../model/user.model");
+const User = require("../models/user.model");
 const scretKey = "csvscvsvsuwdvdfyd";
 const moment = require("moment");
-const Adress = require("../model/adress.model");
+// const Adress = require("../model/adress.model");
 
 const register = async (req, res) => {
   try {
@@ -31,9 +31,8 @@ const register = async (req, res) => {
       name,
       password: hashpassword,
       role,
-      mobile,
       token,
-      adress: address._id
+   
     };
     const data = await User.create(filter);
     return res.status(200).json({ data: data, message: "created done" });
@@ -73,42 +72,42 @@ const login = async (req, res) => {
   }
 };
 
-const updateUser = async (req, res) => {
-  try {
-    const userId = req.body.userId;
-    const existinguser = await User.findById(userId);
-    if (!existinguser) {
-      throw new Error("user does not exists");
-    }
-    await User.findByIdAndUpdate(userId, req.body);
-    res
-      .status(201)
-      .json({ data: existinguser, message: "updated successfully" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+// const updateUser = async (req, res) => {
+//   try {
+//     const userId = req.body.userId;
+//     const existinguser = await User.findById(userId);
+//     if (!existinguser) {
+//       throw new Error("user does not exists");
+//     }
+//     await User.findByIdAndUpdate(userId, req.body);
+//     res
+//       .status(201)
+//       .json({ data: existinguser, message: "updated successfully" });
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
-const fetchList = async (req, res) => {
-  try {
-    const currentUser = await User.findById(req.body.userId); // Assuming you have middleware to extract userId from the request
+// const fetchList = async (req, res) => {
+//   try {
+//     const currentUser = await User.findById(req.body.userId); // Assuming you have middleware to extract userId from the request
 
-    if (!currentUser) {
-      throw new Error("User not found");
-    }
+//     if (!currentUser) {
+//       throw new Error("User not found");
+//     }
 
-    if (currentUser.role === "1") {
-      const allUsers = await User.find();
-      res.status(200).json({ data: allUsers, message: "All users retrieved" });
-    } else {
-      res
-        .status(200)
-        .json({ data: currentUser, message: "Your details retrieved" });
-    }
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+//     if (currentUser.role === "1") {
+//       const allUsers = await User.find();
+//       res.status(200).json({ data: allUsers, message: "All users retrieved" });
+//     } else {
+//       res
+//         .status(200)
+//         .json({ data: currentUser, message: "Your details retrieved" });
+//     }
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
 // const fetchListAllSearchPage = async (req, res) => {
 //   try {
@@ -147,73 +146,73 @@ const fetchList = async (req, res) => {
 //   }
 // };
 
-const deleteUser = async (req, res) => {
-  try {
-    const userId = req.body.userId;
-    const existingUser = await User.findById(userId);
+// const deleteUser = async (req, res) => {
+//   try {
+//     const userId = req.body.userId;
+//     const existingUser = await User.findById(userId);
 
-    if (!existingUser) {
-      throw new Error("User not found");
-    }
+//     if (!existingUser) {
+//       throw new Error("User not found");
+//     }
 
-    const deletedUser = await User.findByIdAndDelete(userId, req.body, {
-      new: true,
-    });
-    res
-      .status(200)
-      .json({ data: deletedUser, message: "Deleted Successfully" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+//     const deletedUser = await User.findByIdAndDelete(userId, req.body, {
+//       new: true,
+//     });
+//     res
+//       .status(200)
+//       .json({ data: deletedUser, message: "Deleted Successfully" });
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
-const searchApi = async (req, res) => {
-  try {
-    const { query } = req.query;
-    if (!query) {
-      throw new Error("Query parameter is missing");
-    }
-    const regex = new RegExp(query, "i");
-    const users = await User.find({
-      $or: [{ name: regex }, { email: regex }],
-    });
+// const searchApi = async (req, res) => {
+//   try {
+//     const { query } = req.query;
+//     if (!query) {
+//       throw new Error("Query parameter is missing");
+//     }
+//     const regex = new RegExp(query, "i");
+//     const users = await User.find({
+//       $or: [{ name: regex }, { email: regex }],
+//     });
 
-    res.status(200).json({ data: users, message: "Search results" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+//     res.status(200).json({ data: users, message: "Search results" });
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
-const pagination = async (req, res) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 2;
+// const pagination = async (req, res) => {
+//   try {
+//     const page = parseInt(req.query.page) || 1;
+//     const limit = parseInt(req.query.limit) || 2;
 
-    const totalCount = await User.countDocuments();
+//     const totalCount = await User.countDocuments();
 
-    const totalPages = Math.ceil(totalCount / limit);
+//     const totalPages = Math.ceil(totalCount / limit);
 
-    const skip = (page - 1) * limit;
+//     const skip = (page - 1) * limit;
 
-    const users = await User.find().skip(skip).limit(limit);
-    if (!users || users.length === 0) {
-      throw new Error("No user found");
-    }
+//     const users = await User.find().skip(skip).limit(limit);
+//     if (!users || users.length === 0) {
+//       throw new Error("No user found");
+//     }
 
-    res.status(200).json({
-      paginations: {
-        total: totalCount,
-        totalPages: totalPages,
-        currentPages: page,
-        limit: limit,
-        message: "Pagination results",
-      },
-      users: users,
-    });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
-  }
-};
+//     res.status(200).json({
+//       paginations: {
+//         total: totalCount,
+//         totalPages: totalPages,
+//         currentPages: page,
+//         limit: limit,
+//         message: "Pagination results",
+//       },
+//       users: users,
+//     });
+//   } catch (error) {
+//     res.status(400).json({ message: error.message });
+//   }
+// };
 
 // const purchase = async (req, res) => {
 //   const purchaseId = req.body.id;
@@ -232,35 +231,35 @@ const pagination = async (req, res) => {
 // };
 
 
-const deleteManyUsers = async (req, res) => {
-  try {
-    const { _id } = req.body;
-    const result = await User.deleteMany({ _id: { $in: _id } });
-    if (result.deletedCount === 0) {
-      throw new Error("No users deleted");
-    }
-    return res.status(200).send({
-      success: true,
-      message: "Deleted Successfully",
-    });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).send({
-      success: false,
-      message: `${err}`,
-    });
-  }
-};
+// const deleteManyUsers = async (req, res) => {
+//   try {
+//     const { _id } = req.body;
+//     const result = await User.deleteMany({ _id: { $in: _id } });
+//     if (result.deletedCount === 0) {
+//       throw new Error("No users deleted");
+//     }
+//     return res.status(200).send({
+//       success: true,
+//       message: "Deleted Successfully",
+//     });
+//   } catch (err) {
+//     console.error(err);
+//     return res.status(500).send({
+//       success: false,
+//       message: `${err}`,
+//     });
+//   }
+// };
 
 module.exports = {
   register,
-  fetchList,
+  // fetchList,
   login,
-  deleteManyUsers,
-  updateUser,
-  deleteUser,
-  searchApi,
-  pagination,
+  // deleteManyUsers,
+  // updateUser,
+  // deleteUser,
+  // searchApi,
+  // pagination,
   // purchase
   // fetchListAllSearchPage
 };

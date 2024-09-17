@@ -11,10 +11,7 @@ const userSchema=new mongoose.Schema({
  email:{
     type:String,
  },
-adress:{
-type:mongoose.Schema.Types.String,
-ref:"adress"
-},
+
  password:{
     type:String,
  },
@@ -24,10 +21,7 @@ role:{
    // enum:['user','admin']
    
  },
- mobile:{
-    type:Number,  //10 digits only
-    minlength:10,
- },
+
 },{
     timeStamp:true,
     versionKey:false,
