@@ -2,11 +2,7 @@ const mongoose=require('mongoose')
 
 const taskSchema=new mongoose.Schema({
     description: String,
-    category: String,
-    userId: { type: mongoose.Schema.Types.ObjectId,
-        ref: 'user',  // Assuming you have a User model
-        },
-    completed: Boolean
+    task: String,
 
 },{
     timeStamp:true,
