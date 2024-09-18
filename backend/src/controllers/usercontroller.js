@@ -110,42 +110,7 @@ const fetchList = async (req, res) => {
 };
 
 
-// const fetchListAllSearchPage = async (req, res) => {
-//   try {
-//     const currentUser = await User.findById(req.body.userId); // Assuming you have middleware to extract userId from the request
 
-//     if (!currentUser) {
-//       throw new Error("User not found");
-//     }
-
-//     let query = {};
-//     let message = "";
-
-//     if (currentUser.role === "1") {
-//       // Check if the user is an admin
-//       // If the user is an admin, fetch all users
-//       query = {}; // Empty query to retrieve all users
-//       message = "All users retrieved";
-//     } else {
-//       // If the user is not an admin, fetch only their own details
-//       query = { _id: currentUser._id }; // Query to retrieve only the current user's details
-//       message = "Your details retrieved";
-//     }
-
-//     // Implement pagination
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 10;
-//     const skip = (page - 1) * limit;
-
-//     const users = await User.find(query)
-//       .skip(skip)
-//       .limit(limit);
-
-//     res.status(200).json({ data: users, message: message });
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
 
 const deleteUser = async (req, res) => {
   try {
@@ -167,100 +132,14 @@ const deleteUser = async (req, res) => {
   }
 };
 
-// const searchApi = async (req, res) => {
-//   try {
-//     const { query } = req.query;
-//     if (!query) {
-//       throw new Error("Query parameter is missing");
-//     }
-//     const regex = new RegExp(query, "i");
-//     const users = await User.find({
-//       $or: [{ name: regex }, { email: regex }],
-//     });
 
-//     res.status(200).json({ data: users, message: "Search results" });
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
-
-// const pagination = async (req, res) => {
-//   try {
-//     const page = parseInt(req.query.page) || 1;
-//     const limit = parseInt(req.query.limit) || 2;
-
-//     const totalCount = await User.countDocuments();
-
-//     const totalPages = Math.ceil(totalCount / limit);
-
-//     const skip = (page - 1) * limit;
-
-//     const users = await User.find().skip(skip).limit(limit);
-//     if (!users || users.length === 0) {
-//       throw new Error("No user found");
-//     }
-
-//     res.status(200).json({
-//       paginations: {
-//         total: totalCount,
-//         totalPages: totalPages,
-//         currentPages: page,
-//         limit: limit,
-//         message: "Pagination results",
-//       },
-//       users: users,
-//     });
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
-
-// const purchase = async (req, res) => {
-//   const purchaseId = req.body.id;
-
-//   // Assuming you have a way to identify the user, such as user ID stored in session or JWT token
-//   const userId = req.user.id; // Replace with your actual way of getting the user ID
-
-//   const previousPurchase = await Purchase.findOne({ userId });
-
-//   if (previousPurchase) {
-//       return res.status(400).json({ message: "You have already made a purchase" });
-//   }
-
-//   // Proceed with the purchase since the user has not made a purchase before
-//   // Here you can write code to actually process the purchase
-// };
-
-
-// const deleteManyUsers = async (req, res) => {
-//   try {
-//     const { _id } = req.body;
-//     const result = await User.deleteMany({ _id: { $in: _id } });
-//     if (result.deletedCount === 0) {
-//       throw new Error("No users deleted");
-//     }
-//     return res.status(200).send({
-//       success: true,
-//       message: "Deleted Successfully",
-//     });
-//   } catch (err) {
-//     console.error(err);
-//     return res.status(500).send({
-//       success: false,
-//       message: `${err}`,
-//     });
-//   }
-// };
 
 module.exports = {
   register,
   fetchList,
   login,
-  // deleteManyUsers, 
+ 
   updateUser,
   deleteUser,
-  // searchApi,
-  // pagination,
-  // purchase
-  // fetchListAllSearchPage
+ 
 };
