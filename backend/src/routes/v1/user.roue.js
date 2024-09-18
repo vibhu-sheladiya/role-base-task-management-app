@@ -2,9 +2,9 @@ const express = require("express");
 const {
   register,
   login,
-//   updateUser,
-//   fetchList,
-//   deleteUser,
+  updateUser,
+  fetchList,
+  deleteUser,
 //   searchApi,
 //   pagination,
 //   deleteManyUsers,
@@ -22,11 +22,11 @@ router.post("/create", register);
 router.post("/login",
      userAuth(),
  login);
-// router.put("/update", updateUser);
+router.put("/update", updateUser);
 
 // router.put("/update-teacher", upload.single("image"), updateTeacher);
 
-// router.get("/list", userAuth(), fetchList);
+router.get("/list", userAuth(), fetchList);
 // router.get("/search", searchApi);
 // router.get("/page", pagination);
 
@@ -34,7 +34,7 @@ router.post("/login",
 
 // router.post("/create", createRating);
 
-// router.delete("/delete", deleteUser);
+router.delete("/delete", deleteUser);
 // router.delete("/delete-many", deleteManyUsers);
 
 module.exports = router;

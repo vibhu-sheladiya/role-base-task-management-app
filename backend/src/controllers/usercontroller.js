@@ -3,14 +3,13 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const scretKey = "csvscvsvsuwdvdfyd";
 const moment = require("moment");
-// const Adress = require("../model/adress.model");
 
 const register = async (req, res) => {
   try {
     const { email, name, password, role, confirmpass, } = req.body;
-    // if (!email || !name || !password || !role || !confirmpass || ) {
-    //   throw new Error("please all feild required and fillup");
-    // }
+    if (!email || !name || !password || !role || !confirmpass ) {
+      throw new Error("please all feild required and fillup");
+    }
     if (password !== confirmpass) {
       throw new Error("password does not match");
     }
@@ -55,6 +54,7 @@ const login = async (req, res) => {
     }
     const payload = {
       email: user.email,
+      role: user.role,
     };
     const token = await jwt.sign(payload, scretKey, {
       expiresIn: "10m",
@@ -72,42 +72,43 @@ const login = async (req, res) => {
   }
 };
 
-// const updateUser = async (req, res) => {
-//   try {
-//     const userId = req.body.userId;
-//     const existinguser = await User.findById(userId);
-//     if (!existinguser) {
-//       throw new Error("user does not exists");
-//     }
-//     await User.findByIdAndUpdate(userId, req.body);
-//     res
-//       .status(201)
-//       .json({ data: existinguser, message: "updated successfully" });
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+const updateUser = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const existinguser = await User.findById(userId);
+    if (!existinguser) {
+      throw new Error("user does not exists");
+    }
+    await User.findByIdAndUpdate(userId, req.body);
+    res
+      .status(201)
+      .json({ data: existinguser, message: "updated successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
-// const fetchList = async (req, res) => {
-//   try {
-//     const currentUser = await User.findById(req.body.userId); // Assuming you have middleware to extract userId from the request
+const fetchList = async (req, res) => {
+  try {
+    const currentUser = await User.findById(req.body.userId); // Assuming you have middleware to extract userId from the request
 
-//     if (!currentUser) {
-//       throw new Error("User not found");
-//     }
+    if (!currentUser) {
+      throw new Error("User not found");
+    }
 
-//     if (currentUser.role === "1") {
-//       const allUsers = await User.find();
-//       res.status(200).json({ data: allUsers, message: "All users retrieved" });
-//     } else {
-//       res
-//         .status(200)
-//         .json({ data: currentUser, message: "Your details retrieved" });
-//     }
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+    if (currentUser.role === "1") {
+      const allUsers = await User.find();
+      res.status(200).json({ data: allUsers, message: "All users retrieved" });
+    } else {
+      res
+        .status(200)
+        .json({ data: currentUser, message: "Your details retrieved" });
+    }
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
+
 
 // const fetchListAllSearchPage = async (req, res) => {
 //   try {
@@ -146,25 +147,25 @@ const login = async (req, res) => {
 //   }
 // };
 
-// const deleteUser = async (req, res) => {
-//   try {
-//     const userId = req.body.userId;
-//     const existingUser = await User.findById(userId);
+const deleteUser = async (req, res) => {
+  try {
+    const userId = req.body.userId;
+    const existingUser = await User.findById(userId);
 
-//     if (!existingUser) {
-//       throw new Error("User not found");
-//     }
+    if (!existingUser) {
+      throw new Error("User not found");
+    }
 
-//     const deletedUser = await User.findByIdAndDelete(userId, req.body, {
-//       new: true,
-//     });
-//     res
-//       .status(200)
-//       .json({ data: deletedUser, message: "Deleted Successfully" });
-//   } catch (error) {
-//     res.status(400).json({ message: error.message });
-//   }
-// };
+    const deletedUser = await User.findByIdAndDelete(userId, req.body, {
+      new: true,
+    });
+    res
+      .status(200)
+      .json({ data: deletedUser, message: "Deleted Successfully" });
+  } catch (error) {
+    res.status(400).json({ message: error.message });
+  }
+};
 
 // const searchApi = async (req, res) => {
 //   try {
@@ -253,11 +254,11 @@ const login = async (req, res) => {
 
 module.exports = {
   register,
-  // fetchList,
+  fetchList,
   login,
-  // deleteManyUsers,
-  // updateUser,
-  // deleteUser,
+  // deleteManyUsers, 
+  updateUser,
+  deleteUser,
   // searchApi,
   // pagination,
   // purchase
