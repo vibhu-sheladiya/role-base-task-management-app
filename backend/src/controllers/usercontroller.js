@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
 const scretKey = "csvscvsvsuwdvdfyd";
 const moment = require("moment");
+const Task = require("../models/task.model");
 
 const register = async (req, res) => {
   try {
@@ -133,13 +134,173 @@ const deleteUser = async (req, res) => {
 };
 
 
+const viewAllUsers = async (req, res) => {
+  try {
+    const { userid } = req.body;
+    const { role } = req.body; // Assuming user information is attached to the request (e.g., via middleware)
+
+    // Check if the logged-in user is an admin
+    if (role !== '2') {
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+
+    // Find tasks assigned to the user
+    const tasks = await Task.find({ assignedTo: userid });
+
+    if (tasks.length === 0) {
+      return res.status(404).json({ message: 'No tasks found for this user.' });
+    }
+
+    res.json(tasks);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+const updateRoleByAdmin = async (req, res) => {
+  try {
+    const { adminid, userid, role } = req.body;
+
+    // Check if the logged-in user is an admin
+    const adminUser = await User.findById(adminid);
+    if (!adminUser || adminUser.role !== '2') { // Assuming role is stored as a string 'admin'
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+
+    // Check if the admin is trying to change their own role
+    if (adminid === userid) {
+      return res.status(400).json({ message: 'Admins cannot change their own role.' });
+    }
+
+    // Validate the new role
+    const validRoles = ['1', '2']; // Example roles
+    if (!validRoles.includes(role)) {
+      return res.status(400).json({ message: 'Invalid role specified.' });
+    }
+
+    // Update the user's role
+    const updatedUser = await User.findByIdAndUpdate(
+      userid,
+      { role },
+      { new: true } // Return the updated user
+    );
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    res.json({ message: 'User role updated successfully.', user: updatedUser });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+const updateUserDetailsByAdmin = async (req, res) => {
+  try {
+    const { adminid, desc, category, taskid } = req.body;
+
+    // Check if the logged-in user is an admin
+    const adminUser = await User.findById(adminid);
+    if (!adminUser || adminUser.role !== '2') { // Assuming role is stored as a string 'admin'
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+
+    // Validate fields
+    if ( !desc || !category || !taskid) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    // Find and update the task
+    const updatedTask = await Task.findByIdAndUpdate(
+      taskid,
+      { assignedTo: desc, category },
+      // { new: true } // Return the updated task
+    );
+
+    if (!updatedTask) {
+      return res.status(404).json({ message: 'Task not found.' });
+    }
+
+    res.json({ message: 'Task updated successfully.', task: updatedTask });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+const createTaskAdmin = async (req, res) => {
+  try {
+    const { adminid, userId, desc, category, taskid } = req.body;
+
+    // Check if the admin is valid and has the right role
+    const adminUser = await User.findById(adminid);
+    if (!adminUser || adminUser.role !== '2') { // Assuming role is stored as a string 'admin'
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+
+    // Validate that the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found.' });
+    }
+
+    // Create the new task
+    const newTask = new Task({
+      taskid,      // Assuming `taskid` is unique identifier
+      desc,
+      category,
+      assignedTo: userId
+    });
+
+    await newTask.save();
+
+    res.status(201).json({ message: 'Task created successfully.', task: newTask });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+const deleteTaskByAdmin = async (req, res) => {
+  try {
+    const { adminid, taskid } = req.body;
+
+    // Check if the logged-in user is an admin
+    const adminUser = await User.findById(adminid);
+    if (!adminUser || adminUser.role !== '2') { // Assuming role '2' represents admin
+      return res.status(403).json({ message: 'Access denied. Admins only.' });
+    }
+
+    // Validate that taskid is provided
+    if (!taskid) {
+      return res.status(400).json({ message: 'Missing required fields.' });
+    }
+
+    // Find and delete the task
+    const deletedTask = await Task.findByIdAndDelete(taskid);
+
+    if (!deletedTask) {
+      return res.status(404).json({ message: 'Task not found.' });
+    }
+
+    res.json({ message: 'Task deleted successfully.', task: deletedTask });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server Error' });
+  }
+};
+
+
+
 
 module.exports = {
   register,
   fetchList,
   login,
- 
+  viewAllUsers,createTaskAdmin,deleteTaskByAdmin,
   updateUser,
-  deleteUser,
+  deleteUser,updateRoleByAdmin,updateUserDetailsByAdmin
  
 };

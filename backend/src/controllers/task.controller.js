@@ -1,37 +1,56 @@
 
-// const User = require("../models/user.model");
+const User = require("../models/user.model");
 
-// const Task= require("../models/task.model");
+const Task= require("../models/task.model");
 
-// const createTask = async (req, res) => {
-//     try {
-//         // Destructure userId, desc, and category from req.body
-//         const { userId, desc, category } = req.body;
+const createTask = async (req, res) => {
+    try {
+        // Destructure userId, desc, and category from req.body
+        const { userId, desc, category } = req.body;
 
-//         // Check if userId, desc, and category are provided
-//         if (!userId || !desc || !category) {
-//             return res.status(400).send({ message: "User ID, description, and category are required" });
-//         }
+        // Check if userId, desc, and category are provided
+        if (!userId || !desc || !category) {
+            return res.status(400).send({ message: "User ID, description, and category are required" });
+        }
 
-//         // Find the user by the provided userId
-//         const user = await User.findById(userId);
+        // Find the user by the provided userId
+        const user = await User.findById(userId);
 
-//         if (!user) {
-//             return res.status(404).send({ message: `No user found with ID ${userId}` });
-//         }
+        if (!user) {
+            return res.status(404).send({ message: `No user found with ID ${userId}` });
+        }
 
-//         // Create the task with user association
-//         const newTask = await Task.create({ user: userId, desc, category });
+        // Create the task with user association
+        const newTask = await Task.create({  userId, desc, category });
 
-//         // Return success response
-//         res.status(200).json({ data: newTask, message: 'Task created successfully' });
-//     } catch (error) {
-//         res.status(500).json({ message: `Error creating task: ${error.message}` });
-//     }
-// };
+        // Return success response
+        res.status(200).json({ data: newTask, message: 'Task created successfully' });
+    } catch (error) {
+        res.status(500).json({ message: `Error creating task: ${error.message}` });
+    }
+};
+
+const markTaskAsCompleted  = async(req,res)=>{
+  const { id } = req.body;
+  
+  try {
+    const task = await Task.findByIdAndUpdate(id, { completed: true }, { new: true });
+    
+    if (!task) {
+      return res.status(404).json({ msg: 'Task not found' });
+    }
+    
+    res.json({ msg: 'Task marked as completed', task });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+}
 
 
-
+module.exports = {
+  createTask,markTaskAsCompleted
+}
 
 // const updateBlog = async (req, res) => {
 //     try {
@@ -186,60 +205,62 @@
 //       createTask
 //     };
 //   };
+
+
   
-module.exports = (io) => {
-    const User = require("../models/user.model");
-    const Task = require("../models/task.model");
+// module.exports = (io) => {
+//     const User = require("../models/user.model");
+//     const Task = require("../models/task.model");
   
-    // Function to create a task
-    const createTask = async (req, res) => {
-      try {
-        const { userId, desc, category } = req.body;
+//     // Function to create a task
+//     const createTask = async (req, res) => {
+//       try {
+//         const { userId, desc, category } = req.body;
   
-        if (!userId || !desc || !category) {
-          return res.status(400).send({ message: "User ID, description, and category are required" });
-        }
+//         if (!userId || !desc || !category) {
+//           return res.status(400).send({ message: "User ID, description, and category are required" });
+//         }
   
-        const user = await User.findById(userId);
+//         const user = await User.findById(userId);
   
-        if (!user) {
-          return res.status(404).send({ message: `No user found with ID ${userId}` });
-        }
+//         if (!user) {
+//           return res.status(404).send({ message: `No user found with ID ${userId}` });
+//         }
   
-        const newTask = await Task.create({ user: userId, desc, category });
+//         const newTask = await Task.create({ user: userId, desc, category });
   
-        // Emit the new task event to all connected clients
-        io.emit("newTaskCreated", newTask);
+//         // Emit the new task event to all connected clients
+//         io.emit("newTaskCreated", newTask);
   
-        return res.status(200).json({ data: newTask, message: 'Task created successfully' });
-      } catch (error) {
-        return res.status(500).json({ message: `Error creating task: ${error.message}` });
-      }
-    };
+//         return res.status(200).json({ data: newTask, message: 'Task created successfully' });
+//       } catch (error) {
+//         return res.status(500).json({ message: `Error creating task: ${error.message}` });
+//       }
+//     };
   
-    // Example function to update a task (with socket emission for task updates)
-    const updateTask = async (req, res) => {
-      try {
-        const { taskId, status } = req.body;
+//     // Example function to update a task (with socket emission for task updates)
+//     const updateTask = async (req, res) => {
+//       try {
+//         const { taskId, status } = req.body;
   
-        const updatedTask = await Task.findByIdAndUpdate(taskId, { status }, { new: true });
+//         const updatedTask = await Task.findByIdAndUpdate(taskId, { status }, { new: true });
   
-        if (!updatedTask) {
-          return res.status(404).json({ message: "Task not found" });
-        }
+//         if (!updatedTask) {
+//           return res.status(404).json({ message: "Task not found" });
+//         }
   
-        // Emit the task status update event
-        io.emit("taskStatusUpdated", updatedTask);
+//         // Emit the task status update event
+//         io.emit("taskStatusUpdated", updatedTask);
   
-        return res.status(200).json({ data: updatedTask, message: "Task updated successfully" });
-      } catch (error) {
-        return res.status(500).json({ message: `Error updating task: ${error.message}` });
-      }
-    };
+//         return res.status(200).json({ data: updatedTask, message: "Task updated successfully" });
+//       } catch (error) {
+//         return res.status(500).json({ message: `Error updating task: ${error.message}` });
+//       }
+//     };
   
-    return {
-      createTask,
-      updateTask
-    };
-  };
+//     return {
+//       createTask,
+//       updateTask
+//     };
+//   };
   
