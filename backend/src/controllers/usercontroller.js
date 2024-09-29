@@ -294,13 +294,28 @@ const deleteTaskByAdmin = async (req, res) => {
 
 
 
+const getUserTasks = async (req, res) => {
+  try {
+    const tasks = await Task.find({ userId: req.user.id });
+    
+    if (!tasks) {
+      return res.status(404).json({ msg: 'No tasks found' });
+    }
+    
+    res.json({ msg: 'Tasks retrieved successfully', tasks });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send('Server Error');
+  }
+};
 
 module.exports = {
   register,
   fetchList,
   login,
-  viewAllUsers,createTaskAdmin,deleteTaskByAdmin,
+  viewAllUsers,createTaskAdmin,deleteTaskByAdmin,getUserTasks,
   updateUser,
   deleteUser,updateRoleByAdmin,updateUserDetailsByAdmin
  
 };
+
